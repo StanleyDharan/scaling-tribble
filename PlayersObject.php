@@ -18,16 +18,29 @@
 */
 
 
-interface IReadWritePlayers {
+/*interface IReadWritePlayers {
     function readPlayers($source, $filename = null);
     function writePlayer($source, $player, $filename = null);
     function display($isCLI, $course, $filename = null);
 }
+*/
 
-class PlayersObject implements IReadWritePlayers {
+interface IReadPlayers{
+    function readPlayers($source, $filename = null);
+}
+
+interface IWritePlayers{
+    function writePlayer($source, $player, $filename = null);
+}
+
+interface IDisplayPlayers{
+    function display($isCLI, $course, $filename = null);
+}
+
+class PlayersObject implements IReadPlayers, IWritePlayers, IDisplayPlayers {
 
     private $playersArray;
-
+    
     private $playerJsonString;
 
     public function __construct() {
