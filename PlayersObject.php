@@ -104,6 +104,7 @@ class GetPlayerData implements IGetPlayers{
 }
 
 class Display implements IDisplayPlayers{
+
     public function __construct(){}
 
     public function displayCLI($source, $PlayerObj){
@@ -180,9 +181,9 @@ class PlayersObject{
 
     private $playersArray;
     private $playerJsonString;
-    private $playerData;
+    private $RetrieveData;
 
-    public function __construct() {
+    public function __construct($PlayerDataObj) {
         //We're only using this if we're storing players as an array.
         $this->playersArray = [];
 
@@ -190,7 +191,7 @@ class PlayersObject{
         $this->playerJsonString = null;
 
         //Instantiate GetPlayerData
-        $this->playerData = new GetPlayerData();
+        $this->RetrieveData = $PlayerDataObj;
     }
 
     public function getPlayerJSON() {
@@ -205,22 +206,22 @@ class PlayersObject{
 
         switch ($source) {
             case 'array':
-                $this->playersArray = $this->playerData->getPlayerDataArray();
+                $this->playersArray = $this->RetrieveData->getPlayerDataArray();
                 break;
             case 'json':
-                $this->playerJsonString = $this->playerData->getPlayerDataJson();
+                $this->playerJsonString = $this->RetrieveData->getPlayerDataJson();
                 break;
             case 'file':
-                $this->playerJsonString = $this->playerData->getPlayerDataFromFile($filename);
+                $this->playerJsonString = $this->RetrieveData->getPlayerDataFromFile($filename);
                 break;
         }
     }
 
 }
 
-$playersObject = new PlayersObject();
-$displayPlayers = new Display();
+$playersObject = new PlayersObject(new GetPlayerData());
 $playersObject->loadData('array');
+$displayPlayers = new Display();
 $displayPlayers->displayCLI('array', $playersObject);
 
 ?>
