@@ -25,8 +25,10 @@
 }
 */
 
-interface IReadPlayers{
-    function readPlayers($source, $filename = null);
+interface IGetPlayers{
+    function getPlayerDataArray();
+    function getPlayerDataJson();
+    function getPlayerDataFromFile($filename);
 }
 
 interface IWritePlayers{
@@ -37,7 +39,68 @@ interface IDisplayPlayers{
     function display($isCLI, $course, $filename = null);
 }
 
-class PlayersObject implements IReadPlayers, IWritePlayers, IDisplayPlayers {
+/* 
+* Contains multiple methods to getting player data from different types of sources
+*/
+class GetPlayerData implements IGetPlayers{
+    /** 
+    * get JSON player data
+    * @return string json
+    */
+    public function getPlayerDataJson() {
+        $json = '[{"name":"Jonas Valenciunas","age":26,"job":"Center","salary":"4.66m"},{"name":"Kyle Lowry","age":32,"job":"Point Guard","salary":"28.7m"},{"name":"Demar DeRozan","age":28,"job":"Shooting Guard","salary":"26.54m"},{"name":"Jakob Poeltl","age":22,"job":"Center","salary":"2.704m"}]';
+        
+        $playerData = json_decode($json);
+        return $playerData;
+    }
+
+    /**
+     * get player data as array
+     * @return array \stdClass
+     */
+    public function getPlayerDataArray() {
+
+        $playerData = [];
+
+        $jonas = new \stdClass();
+        $jonas->name = 'Jonas Valenciunas';
+        $jonas->age = 26;
+        $jonas->job = 'Center';
+        $jonas->salary = '4.66m';
+        $playerData[] = $jonas;
+
+        $kyle = new \stdClass();
+        $kyle->name = 'Kyle Lowry';
+        $kyle->age = 32;
+        $kyle->job = 'Point Guard';
+        $kyle->salary = '28.7m';
+        $playerData[] = $kyle;
+
+        $demar = new \stdClass();
+        $demar->name = 'Demar DeRozan';
+        $demar->age = 28;
+        $demar->job = 'Shooting Guard';
+        $demar->salary = '26.54m';
+        $playerData[] = $demar;
+
+        $jakob = new \stdClass();
+        $jakob->name = 'Jakob Poeltl';
+        $jakob->age = 22;
+        $jakob->job = 'Center';
+        $jakob->salary = '2.704m';
+        $playerData[] = $jakob;
+
+        return $playerData;
+    }
+
+    public function getPlayerDataFromFile($filename) {
+        $playerData = file_get_contents($filename);
+
+        return $playerData;
+    }
+}
+
+class PlayersObject extends GetPlayerData implements IDisplayPlayers {
 
     private $playersArray;
     
@@ -51,113 +114,21 @@ class PlayersObject implements IReadPlayers, IWritePlayers, IDisplayPlayers {
         $this->playerJsonString = null;
     }
 
-    /**
-     * @param $source string Where we're retrieving the data from. 'json', 'array' or 'file'
-     * @param $filename string Only used if we're reading players in 'file' mode.
-     * @return string json
-     */
-    function readPlayers($source, $filename = null) {
-        $playerData = null;
-
-        switch ($source) {
-            case 'array':
-                $playerData = $this->getPlayerDataArray();
-                break;
-            case 'json':
-                $playerData = $this->getPlayerDataJson();
-                break;
-            case 'file':
-                $playerData = $this->getPlayerDataFromFile($filename);
-                break;
-        }
-
-        if (is_string($playerData)) {
-            $playerData = json_decode($playerData);
-        }
-
-        return $playerData;
-
-    }
-
-    /**
-     * @param $source string Where to write the data. 'json', 'array' or 'file'
-     * @param $filename string Only used if we're writing in 'file' mode
-     * @param $player \stdClass Class implementation of the player with name, age, job, salary.
-     */
-    function writePlayer($source, $player, $filename = null) {
-        switch ($source) {
-            case 'array':
-                $this->playersArray[] = $player;
-                break;
-            case 'json':
-                $players = [];
-                if ($this->playerJsonString) {
-                    $players = json_decode($this->playerJsonString);
-                }
-                $players[] = $player;
-                $this->playerJsonString = json_encode($player);
-                break;
-            case 'file':
-                $players = json_decode($this->getPlayerDataFromFile($filename));
-                if (!$players) {
-                    $players = [];
-                }
-                $players[] = $player;
-                file_put_contents($filename, json_encode($players));
-                break;
-        }
-    }
-
-
-    function getPlayerDataArray() {
-
-        $players = [];
-
-        $jonas = new \stdClass();
-        $jonas->name = 'Jonas Valenciunas';
-        $jonas->age = 26;
-        $jonas->job = 'Center';
-        $jonas->salary = '4.66m';
-        $players[] = $jonas;
-
-        $kyle = new \stdClass();
-        $kyle->name = 'Kyle Lowry';
-        $kyle->age = 32;
-        $kyle->job = 'Point Guard';
-        $kyle->salary = '28.7m';
-        $players[] = $kyle;
-
-        $demar = new \stdClass();
-        $demar->name = 'Demar DeRozan';
-        $demar->age = 28;
-        $demar->job = 'Shooting Guard';
-        $demar->salary = '26.54m';
-        $players[] = $demar;
-
-        $jakob = new \stdClass();
-        $jakob->name = 'Jakob Poeltl';
-        $jakob->age = 22;
-        $jakob->job = 'Center';
-        $jakob->salary = '2.704m';
-        $players[] = $jakob;
-
-        return $players;
-
-    }
-
-    function getPlayerDataJson() {
-        $json = '[{"name":"Jonas Valenciunas","age":26,"job":"Center","salary":"4.66m"},{"name":"Kyle Lowry","age":32,"job":"Point Guard","salary":"28.7m"},{"name":"Demar DeRozan","age":28,"job":"Shooting Guard","salary":"26.54m"},{"name":"Jakob Poeltl","age":22,"job":"Center","salary":"2.704m"}]';
-        return $json;
-    }
-
-    function getPlayerDataFromFile($filename) {
-        $file = file_get_contents($filename);
-        return $file;
-    }
-
     function display($isCLI, $source, $filename = null) {
+        $players = null;
 
-        $players = $this->readPlayers($source, $filename);
+        switch ($source) {
+            case 'array':
+                $players = parent::getPlayerDataArray();
+                break;
+            case 'json':
+                $players = parent::getPlayerDataJson();
+                break;
+            case 'file':
+                $players = parent::getPlayerDataFromFile($filename);
+                break;
+        }
+        
 
         if ($isCLI) {
             echo "Current Players: \n";
