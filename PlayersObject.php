@@ -36,13 +36,16 @@ interface IWritePlayers{
 }
 
 interface IDisplayPlayers{
-    function display($isCLI, $course, $filename = null);
+    function displayCLI($source, $PlayerObj);
+    function displayHTML($source, $PlayerObj);
 }
 
 /* 
 * Contains multiple methods to getting player data from different types of sources
 */
 class GetPlayerData implements IGetPlayers{
+
+    public function __construct(){}
     /** 
     * get JSON player data
     * @return string json
@@ -100,11 +103,84 @@ class GetPlayerData implements IGetPlayers{
     }
 }
 
-class PlayersObject extends GetPlayerData implements IDisplayPlayers {
+class Display implements IDisplayPlayers{
+    public function __construct(){}
+
+    public function displayCLI($source, $PlayerObj){
+        $players = null;
+
+        switch ($source) {
+            case 'array':
+                $players = $PlayerObj->getPlayerArray();
+                break;
+            case 'json':
+                $players = $PlayerObj->getPlayerJSON();
+            case 'file':
+                $players = $PlayerObj->getPlayerJSON();
+        }
+
+        echo "Current Players: \n";
+        foreach ($players as $player) {
+
+            echo "\tName: $player->name\n";
+            echo "\tAge: $player->age\n";
+            echo "\tSalary: $player->salary\n";
+            echo "\tJob: $player->job\n\n";
+        }
+    }
+    public function displayHTML($source, $PlayerObj) {
+        $players = null;
+
+        switch ($source) {
+            case 'array':
+                $players = $PlayerObj->getPlayerArray();
+                break;
+            case 'json':
+                $players = $PlayerObj->getPlayerJSON();
+            case 'file':
+                $players = $PlayerObj->getPlayerJSON();
+        }
+        
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                li {
+                    list-style-type: none;
+                    margin-bottom: 1em;
+                }
+                span {
+                    display: block;
+                }
+            </style>
+        </head>
+        <body>
+        <div>
+            <span class="title">Current Players</span>
+            <ul>
+                <?php foreach($players as $player) { ?>
+                    <li>
+                        <div>
+                            <span class="player-name">Name: <?= $player->name ?></span>
+                            <span class="player-age">Age: <?= $player->age ?></span>
+                            <span class="player-salary">Salary: <?= $player->salary ?></span>
+                            <span class="player-job">Job: <?= $player->job ?></span>
+                        </div>
+                    </li>
+                <?php } ?>
+            </ul>
+        </body>
+        </html>
+        <?php
+    }    
+}
+
+class PlayersObject{
 
     private $playersArray;
-    
     private $playerJsonString;
+    private $playerData;
 
     public function __construct() {
         //We're only using this if we're storing players as an array.
@@ -112,74 +188,39 @@ class PlayersObject extends GetPlayerData implements IDisplayPlayers {
 
         //We'll only use this one if we're storing players as a JSON string
         $this->playerJsonString = null;
+
+        //Instantiate GetPlayerData
+        $this->playerData = new GetPlayerData();
     }
 
-    function display($isCLI, $source, $filename = null) {
-        $players = null;
+    public function getPlayerJSON() {
+        return $this->playerJsonString;
+    }
+
+    public function getPlayerArray() {
+        return $this->playersArray;
+    }
+
+    public function loadData($source, $filename = null) {
 
         switch ($source) {
             case 'array':
-                $players = parent::getPlayerDataArray();
+                $this->playersArray = $this->playerData->getPlayerDataArray();
                 break;
             case 'json':
-                $players = parent::getPlayerDataJson();
+                $this->playerJsonString = $this->playerData->getPlayerDataJson();
                 break;
             case 'file':
-                $players = parent::getPlayerDataFromFile($filename);
+                $this->playerJsonString = $this->playerData->getPlayerDataFromFile($filename);
                 break;
-        }
-        
-
-        if ($isCLI) {
-            echo "Current Players: \n";
-            foreach ($players as $player) {
-
-                echo "\tName: $player->name\n";
-                echo "\tAge: $player->age\n";
-                echo "\tSalary: $player->salary\n";
-                echo "\tJob: $player->job\n\n";
-            }
-        } else {
-
-            ?>
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <style>
-                    li {
-                        list-style-type: none;
-                        margin-bottom: 1em;
-                    }
-                    span {
-                        display: block;
-                    }
-                </style>
-            </head>
-            <body>
-            <div>
-                <span class="title">Current Players</span>
-                <ul>
-                    <?php foreach($players as $player) { ?>
-                        <li>
-                            <div>
-                                <span class="player-name">Name: <?= $player->name ?></span>
-                                <span class="player-age">Age: <?= $player->age ?></span>
-                                <span class="player-salary">Salary: <?= $player->salary ?></span>
-                                <span class="player-job">Job: <?= $player->job ?></span>
-                            </div>
-                        </li>
-                    <?php } ?>
-                </ul>
-            </body>
-            </html>
-            <?php
         }
     }
 
 }
 
 $playersObject = new PlayersObject();
-
-$playersObject->display(php_sapi_name() === 'cli', 'array');
+$displayPlayers = new Display();
+$playersObject->loadData('array');
+$displayPlayers->displayCLI('array', $playersObject);
 
 ?>
