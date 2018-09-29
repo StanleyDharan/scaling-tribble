@@ -25,10 +25,10 @@
 }
 */
 
-interface IGetPlayers{
-    function getPlayerDataArray();
-    function getPlayerDataJson();
-    function getPlayerDataFromFile($filename);
+interface IReadPlayers{
+    function ReadPlayerDataArray();
+    function ReadPlayerDataJson();
+    function ReadPlayerDataFromFile($filename);
 }
 
 interface IWritePlayers{
@@ -43,14 +43,14 @@ interface IDisplayPlayers{
 /* 
 * Contains multiple methods to getting player data from different types of sources
 */
-class GetPlayerData implements IGetPlayers{
+class ReadPlayerData implements IReadPlayers{
 
     public function __construct(){}
     /** 
     * get JSON player data
     * @return string json
     */
-    public function getPlayerDataJson() {
+    public function ReadPlayerDataJson() {
         $json = '[{"name":"Jonas Valenciunas","age":26,"job":"Center","salary":"4.66m"},{"name":"Kyle Lowry","age":32,"job":"Point Guard","salary":"28.7m"},{"name":"Demar DeRozan","age":28,"job":"Shooting Guard","salary":"26.54m"},{"name":"Jakob Poeltl","age":22,"job":"Center","salary":"2.704m"}]';
         
         $playerData = json_decode($json);
@@ -61,7 +61,7 @@ class GetPlayerData implements IGetPlayers{
      * get player data as array
      * @return array \stdClass
      */
-    public function getPlayerDataArray() {
+    public function ReadPlayerDataArray() {
 
         $playerData = [];
 
@@ -96,7 +96,7 @@ class GetPlayerData implements IGetPlayers{
         return $playerData;
     }
 
-    public function getPlayerDataFromFile($filename) {
+    public function ReadPlayerDataFromFile($filename) {
         $playerData = file_get_contents($filename);
 
         return $playerData;
@@ -110,6 +110,10 @@ class Display implements IDisplayPlayers{
     public function displayCLI($source, $PlayerObj){
         $players = null;
 
+        if(!isset($PlayerObj)){
+            throw new Exception('The player Object passed was NULL.');
+        }
+
         switch ($source) {
             case 'array':
                 $players = $PlayerObj->getPlayerArray();
@@ -118,6 +122,8 @@ class Display implements IDisplayPlayers{
                 $players = $PlayerObj->getPlayerJSON();
             case 'file':
                 $players = $PlayerObj->getPlayerJSON();
+            default:
+                throw new Exception('You entered an invalid source type, please use: "array", "json" or "file" with the file name.');
         }
 
         echo "Current Players: \n";
@@ -190,7 +196,7 @@ class PlayersObject{
         //We'll only use this one if we're storing players as a JSON string
         $this->playerJsonString = null;
 
-        //Instantiate GetPlayerData
+        //Instantiate ReadPlayerData
         $this->RetrieveData = $PlayerDataObj;
     }
 
@@ -202,26 +208,31 @@ class PlayersObject{
         return $this->playersArray;
     }
 
-    public function loadData($source, $filename = null) {
-
+    public function readData($source, $filename = null) {
+        
         switch ($source) {
             case 'array':
-                $this->playersArray = $this->RetrieveData->getPlayerDataArray();
+                $this->playersArray = $this->RetrieveData->ReadPlayerDataArray();
                 break;
             case 'json':
-                $this->playerJsonString = $this->RetrieveData->getPlayerDataJson();
+                $this->playerJsonString = $this->RetrieveData->ReadPlayerDataJson();
                 break;
             case 'file':
-                $this->playerJsonString = $this->RetrieveData->getPlayerDataFromFile($filename);
+                $this->playerJsonString = $this->RetrieveData->ReadPlayerDataFromFile($filename);
                 break;
+            default:
+                throw new Exception('You provided an invalid method to load player data. Try: "array", "json" or "file" with the file name.');
         }
     }
 
 }
-
-$playersObject = new PlayersObject(new GetPlayerData());
-$playersObject->loadData('array');
+try{
+$playersObject = new PlayersObject(new ReadPlayerData());
+$playersObject->readData('array');
 $displayPlayers = new Display();
 $displayPlayers->displayCLI('array', $playersObject);
-
+}
+catch(Exception $e){
+    echo $e;
+}
 ?>
