@@ -6,7 +6,9 @@ interface IReadPlayers{
     function ReadPlayerDataFromFile($filename);
 }
 
-
+/**
+ * Read's data from specified data type
+ */
 class PlayerReader implements IReadPlayers{
     /**
      * @return array of stdClass objects

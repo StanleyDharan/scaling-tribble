@@ -1,5 +1,5 @@
 <?php
-require 'PlayerModel.php';
+require 'data_models/PlayerModel.php';
 require 'playerReader.php';
 require 'playerWriter.php';
 require 'display.php';
@@ -66,8 +66,4 @@ class PlayerController{
         $this->display->displayHTML($this->playerModels);
     }
 }
-
-$controller = new PlayerController(new PlayerReader(), new PlayerWriter(), new Display());
-$controller->addJsonData('playerdata.json');
-$controller->displayPlayersCLI();
 ?>
