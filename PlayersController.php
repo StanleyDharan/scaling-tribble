@@ -2,127 +2,72 @@
 require 'PlayerModel.php';
 require 'playerReader.php';
 require 'playerWriter.php';
+require 'display.php';
 
-interface IDisplayPlayers{
-    function displayCLI(&$PlayerModel);
-    function displayHTML(&$PlayerModel);
-}
-
-class Display{
-    function displayCLI(&$PlayerModel){
-        $players = $PlayerModel->getPlayersData();
-
-        echo var_dump($players);
-
-        echo "Current Players: \n";
-        foreach ($players as $player) {
-
-            echo "\tName: $player->name\n";
-            echo "\tAge: $player->age\n";
-            echo "\tSalary: $player->salary\n";
-            echo "\tJob: $player->job\n\n";
-        }
-    }
-
-    function displayHTML(&$PlayerModel){
-        $players = $PlayerModel->getPlayersData();
-
-        ?>
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                li {
-                    list-style-type: none;
-                    margin-bottom: 1em;
-                }
-                span {
-                    display: block;
-                }
-            </style>
-        </head>
-        <body>
-        <div>
-            <span class="title">Current Players</span>
-            <ul>
-                <?php foreach($players as $player) { ?>
-                    <li>
-                        <div>
-                            <span class="player-name">Name: <?= $player->name ?></span>
-                            <span class="player-age">Age: <?= $player->age ?></span>
-                            <span class="player-salary">Salary: <?= $player->salary ?></span>
-                            <span class="player-job">Job: <?= $player->job ?></span>
-                        </div>
-                    </li>
-                <?php } ?>
-            </ul>
-        </body>
-        </html>
-        <?php
-
-    }
-}
-
+/**
+ * Controller for all player data
+ */
 class PlayerController{
     private $reader;
     private $writer;
     private $display;
-    private $model;
+    private $playerModels = [];
 
+    /**
+     * @param $readObj - A new instance of the player read class
+     * @param $writeObj - A new instance of the player write class
+     * @param $displayObj - A new instance of the display class
+     */
     public function __construct($readObj, $writeObj, $displayObj){
         $this->reader = $readObj;
         $this->writer = $writeObj;
         $this->display = $displayObj;
     }
 
-    //create model
-    public function createModel($DataModelObj){
-        $this->model = $DataModelObj;
-    }
-
-    //data retrieval
+    /**
+     * wrapper function to read and create player data models from a JSON string.
+     */
     public function addJsonData(){
-        if(!isset($this->model)){
-            throw new Exception("No model was created to modify!");
-        }
-        else{
-            $data = $this->reader->ReadPlayerDataJson();
+        $playersData = $this->reader->ReadPlayerDataJson();
 
-            $this->writer->writeDataToModel($this->model, $data);
-        }
+        $this->writer->writeDataToModel($this->playerModels, $playersData);
     }
 
+    /**
+     * wrapper function to read and create player data models from an Array.
+     */
     public function addArrayData(){
-        if(!isset($this->model)){
-            throw new Exception("No model was created to modify!");
-        }
-        else{
-            $data = $this->reader->ReadPlayerDataArray();
-            $this->writer->writeDataToModel($this->model, $data);
-        }
+        $playersData = $this->reader->ReadPlayerDataArray();
+
+        $this->writer->writeDataToModel($this->playerModels, $playersData);
     }
 
+    /**
+     * wrapper function to read data from the file provided in param and then creates player models.
+     * @param $filename - name of file to be read.
+     */
     public function addFileData($filename){
-        if(!isset($this->model)){
-            throw new Exception("No model was created to modify!");
-        }
-        else{
-            $data = $this->reader->ReadPlayerDataFromFile($filename);
-            $this->writer->writeDataToModel($this->model, $data);
-        }
+        $playersData = $this->reader->ReadPlayerDataFromFile($filename);
+
+        $this->writer->writeDataToModel($this->playerModels, $playersData);
     }
-    //display model
+    
+    /**
+     * wrapper to display the player models in CLI
+     */
     public function displayPlayersCLI(){
-        $this->display->displayCLI($this->model);
+        $this->display->displayCLI($this->playerModels);
     }
 
+    /**
+     * wrapper to display player models as HTML
+     */
     public function displayPlayersHTML(){
-        $this->display->displayHTML($this->model);
+        $this->display->displayHTML($this->playerModels);
     }
 }
 
 $controller = new PlayerController(new PlayerReader(), new PlayerWriter(), new Display());
-$controller->createModel(new PlayersModel());
-$controller->addFileData('playerdata.json');
+$controller->addJsonData('playerdata.json');
 $controller->displayPlayersCLI();
 ?>

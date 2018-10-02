@@ -1,13 +1,21 @@
 <?php
 
 interface IWritePlayers{
-    function writeDataToModel(&$PlayerModel, $data);
+    function writeDataToModel(&$ModelsList, $playersData);
 }
 
 class PlayerWriter implements IWritePlayers{
-    
-    public function writeDataToModel(&$PlayerModel, $data){
-        $PlayerModel->setPlayersData($data);
+    /**
+     * takes stdClass objects and creates player data models
+     * @param &$ModelsList - reference to a array of player data models
+     * @param $playersData - array of stdClass objects containing player data.
+     */
+    public function writeDataToModel(&$ModelsList, $playersData){
+        foreach($playersData as $player){
+            $playerModel = new PlayersModel($player->name, $player->age, $player->job, $player->salary);
+
+            array_push($ModelsList, $playerModel);
+        }
     }
 }
 ?>

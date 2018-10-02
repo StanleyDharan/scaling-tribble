@@ -8,14 +8,19 @@ interface IReadPlayers{
 
 
 class PlayerReader implements IReadPlayers{
-    
+    /**
+     * @return array of stdClass objects
+     */
     public function ReadPlayerDataJson(){
         $json = '[{"name":"Jonas Valenciunas","age":26,"job":"Center","salary":"4.66m"},{"name":"Kyle Lowry","age":32,"job":"Point Guard","salary":"28.7m"},{"name":"Demar DeRozan","age":28,"job":"Shooting Guard","salary":"26.54m"},{"name":"Jakob Poeltl","age":22,"job":"Center","salary":"2.704m"}]';
-        
+
         $playerData = json_decode($json);
         return $playerData;
     }
 
+    /**
+     * @return array of stdClass objects
+     */
     public function ReadPlayerDataArray(){
         $playerData = [];
 
@@ -50,6 +55,10 @@ class PlayerReader implements IReadPlayers{
         return $playerData;
     }
 
+    /**
+     * @param $filename - name of file to be parsed
+     * @return array of stdClass objects
+     */
     public function ReadPlayerDataFromFile($filename){
         $json = file_get_contents($filename);
         
