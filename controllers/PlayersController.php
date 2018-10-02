@@ -1,5 +1,5 @@
 <?php
-require 'data_models/PlayerModel.php';
+require 'models/PlayerModel.php';
 require 'playerReader.php';
 require 'playerWriter.php';
 require 'display.php';
