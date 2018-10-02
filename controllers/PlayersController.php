@@ -27,8 +27,8 @@ class PlayerController{
     /**
      * wrapper function to read and create player data models from a JSON string.
      */
-    public function addJsonData(){
-        $playersData = $this->reader->ReadPlayerDataJson();
+    public function addJsonData($jsonString = null){
+        $playersData = $this->reader->ReadPlayerDataJson($jsonString);
 
         $this->writer->writeDataToModel($this->playerModels, $playersData);
     }
@@ -36,8 +36,8 @@ class PlayerController{
     /**
      * wrapper function to read and create player data models from an Array.
      */
-    public function addArrayData(){
-        $playersData = $this->reader->ReadPlayerDataArray();
+    public function addArrayData($dataArray = null){
+        $playersData = $this->reader->ReadPlayerDataArray($dataArray);
 
         $this->writer->writeDataToModel($this->playerModels, $playersData);
     }

@@ -14,7 +14,6 @@ class Display implements IDisplayPlayers{
         echo "Current Players: \n";
         foreach ($playerModels as $player) {
             $playerInfo = json_decode($player->getPlayersData());
-
             echo "\tName: $playerInfo->name\n";
             echo "\tAge: $playerInfo->age\n";
             echo "\tSalary: $playerInfo->salary\n";

@@ -1,8 +1,8 @@
 <?php
 
 interface IReadPlayers{
-    function ReadPlayerDataArray();
-    function ReadPlayerDataJson();
+    function ReadPlayerDataArray($dataArray = null);
+    function ReadPlayerDataJson($jsonString = null);
     function ReadPlayerDataFromFile($filename);
 }
 
@@ -13,9 +13,14 @@ class PlayerReader implements IReadPlayers{
     /**
      * @return array of stdClass objects
      */
-    public function ReadPlayerDataJson(){
-        $json = '[{"name":"Jonas Valenciunas","age":26,"job":"Center","salary":"4.66m"},{"name":"Kyle Lowry","age":32,"job":"Point Guard","salary":"28.7m"},{"name":"Demar DeRozan","age":28,"job":"Shooting Guard","salary":"26.54m"},{"name":"Jakob Poeltl","age":22,"job":"Center","salary":"2.704m"}]';
-
+    public function ReadPlayerDataJson($jsonString = null){
+        $json = null;
+        if($jsonString){
+            $json = $jsonString;
+        }
+        else{
+            $json = '[{"name":"Jonas Valenciunas","age":26,"job":"Center","salary":"4.66m"},{"name":"Kyle Lowry","age":32,"job":"Point Guard","salary":"28.7m"},{"name":"Demar DeRozan","age":28,"job":"Shooting Guard","salary":"26.54m"},{"name":"Jakob Poeltl","age":22,"job":"Center","salary":"2.704m"}]';
+        }
         $playerData = json_decode($json);
         return $playerData;
     }
@@ -23,7 +28,14 @@ class PlayerReader implements IReadPlayers{
     /**
      * @return array of stdClass objects
      */
-    public function ReadPlayerDataArray(){
+    public function ReadPlayerDataArray($dataArray = null){
+        $size = count($dataArray);
+        if($size > 0){
+            $type = gettype($dataArray[0]);
+            if($type == 'object'){
+                return $dataArray;
+            }
+        }
         $playerData = [];
 
         $jonas = new \stdClass();
